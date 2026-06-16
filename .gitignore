@@ -1,0 +1,40 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.cursor
+
+# UV
+uv.lock
+
+# Outputs
+out/
+reports/
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local DB
+vector-db/
