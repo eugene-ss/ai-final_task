@@ -23,64 +23,17 @@ ships a **custom Healthcare NL API** behind a ReAct agent.
 
 ## Table of contents
 
-1. [Architecture](#architecture)
-2. [Focus-area mapping](#focus-area-mapping)
-3. [Project layout](#project-layout)
-4. [Setup](#setup)
-5. [Running the chatbot](#running-the-chatbot)
-6. [How the corpus is built](#how-the-corpus-is-built)
-7. [Configuration reference](#configuration-reference)
-8. [MCP servers and tools](#mcp-servers-and-tools)
-9. [Testing](#testing)
-10. [Observability](#observability)
-11. [Security and guardrails](#security-and-guardrails)
-12. [Known limitations](#known-limitations)
-
----
-
-## Architecture
-
-```mermaid
-flowchart TD
-    User[User CLI REPL] --> Triage[Triage Agent OpenAI Agents SDK]
-    Triage -->|structured queries| Disaster[Disaster Knowledge Agent]
-    Triage -->|narrative queries| RAG[Disaster Narrative RAG Agent]
-    Triage -->|clinical text| Health[Healthcare NL Agent ReAct]
-
-    Disaster <-->|MCP stdio| DisServer[FastMCP disaster_server]
-    RAG <-->|MCP stdio| RAGServer[FastMCP rag_server]
-    Health <-->|MCP stdio| HealthServer[FastMCP healthcare_server]
-
-    DisServer --> Repo[DisasterRepository Pandas]
-    Repo --> CSVs[(EM-DAT CSVs 1900-2021, 1970-2021)]
-
-    RAGServer --> Builder[DisasterDocumentBuilder narratives + impact tables]
-    Builder --> Repo
-    RAGServer --> Hybrid[HybridRetriever RRF]
-    Hybrid --> Chroma[(Chroma dense + text-embedding-005)]
-    Hybrid --> BM25[BM25 keyword index]
-    RAGServer --> MMIngest[Multimodal PDF ingestion if reports dropped under dataset/disaster_reports/]
-    RAGServer --> AnswerGen[AnswerGenerator gpt-4 structured output]
-
-    HealthServer --> NLAPI[Healthcare NL API LLM-backed]
-    NLAPI --> LLM[gpt-4 with_structured_output]
-
-    Triage -.->|guardrails| Guard[input/output/tool/PII validation]
-    Triage -.->|tracing| OTel[OpenTelemetry]
-```
-
-Both disaster specialists operate on the **same EM-DAT data** but answer
-different question types:
-
-* **Disaster Knowledge Agent** — STRUCTURED queries (counts, sums, top-N,
-  filtered lists) via Pandas.
-* **Disaster Narrative RAG Agent** — SEMANTIC queries ("tell me about the
-  Kobe earthquake", "summarise the 2010 Haiti event", "find disasters
-  similar to Ida") via hybrid Chroma + BM25 retrieval over generated
-  narrative documents.
-
-The triage prompt routes between them based on whether the user wants
-numbers or prose.
+1. [Focus-area mapping](#focus-area-mapping)
+2. [Project layout](#project-layout)
+3. [Setup](#setup)
+4. [Running the chatbot](#running-the-chatbot)
+5. [How the corpus is built](#how-the-corpus-is-built)
+6. [Configuration reference](#configuration-reference)
+7. [MCP servers and tools](#mcp-servers-and-tools)
+8. [Testing](#testing)
+9. [Observability](#observability)
+10. [Security and guardrails](#security-and-guardrails)
+11. [Known limitations](#known-limitations)
 
 ---
 
@@ -210,7 +163,7 @@ You will see:
 
 ```
 ================================================================
-  AI-Final Chatbot - RAG | Disasters | Healthcare NL
+  AI-Disaster Chatbot - RAG | Disasters | Healthcare NL
   Model: gpt-4
   Slash commands: /help /quit /clear /reindex
   (OpenTelemetry tracing enabled - spans printed to console)
@@ -387,22 +340,6 @@ uv run pytest --cov=chatbot --cov-report=term-missing
   integration test mocks `Runner.run` and asserts `AgentSession`
   validates input/output through the guardrails and threads message
   history correctly.
-
-Coverage on critical business modules (current run):
-
-| Module | Coverage |
-|---|---:|
-| `chatbot.disasters.repository` | **92 %** |
-| `chatbot.healthcare.nl_api` | **82 %** |
-| `chatbot.security.guardrails` | **87 %** |
-| `chatbot.security.pii_filter` | **98 %** |
-| `chatbot.rag.retrieval.bm25_index` | **83 %** |
-| `chatbot.rag.retrieval.hybrid_retriever` | **95 %** |
-| `chatbot.rag.retrieval.vector_store` | **93 %** |
-| `chatbot.rag.answer_generator` | **85 %** |
-| `chatbot.rag.security_facade` | **79 %** |
-| `chatbot.settings.app_config` | **91 %** |
-| `chatbot.model.schemas` | **100 %** |
 
 `chatbot.disasters.document_builder` and `chatbot.settings.app_config` are exercised
 indirectly (the builder is run as part of `RAGSystem`, and `AppConfig` /
