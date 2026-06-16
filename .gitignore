@@ -32,9 +32,24 @@ out/
 reports/
 *.log
 
+# Test / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+src/*.egg-info/
+
 # OS
 .DS_Store
 Thumbs.db
 
 # Local DB
 vector-db/
+
+# Runtime outputs (kept folder, ignore content)
+results/audit/*.jsonl
+results/evaluation_results/*.json
+results/evaluations/**
+results/logs/*.log
+results/visualizations/*.png

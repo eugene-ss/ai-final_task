@@ -1,0 +1,137 @@
+app:
+  name: "AI Final Chatbot"
+  version: "0.1.0"
+  log_level: "INFO"
+
+llm:
+  model: gpt-4
+  api_version: "2025-01-01-preview"
+  deployment_name: gpt-4
+  temperature: 0.0
+  max_tokens: 4096
+  request_timeout_s: 60
+
+embeddings:
+  model: text-embedding-005
+  chunk_size: 2048
+  deployment_name: text-embedding-005
+
+text_splitter:
+  chunk_size: 1024
+  chunk_overlap: 200
+
+storage:
+  chroma_db_path: "chroma_db"
+  evaluation_results_path: "evaluation_results"
+  logs_path: "logs"
+  chroma_collection_name: "disaster_corpus"
+
+access_control:
+  department_categories:
+    DisasterResponse: ["Earthquake", "Volcanic activity", "Mass movement (dry)", "Mass movement (wet)"]
+    ClimateOps: ["Flood", "Drought", "Storm", "Wildfire", "Extreme temperature ", "Glacial lake outburst"]
+    PublicHealth: ["Epidemic", "Insect infestation", "Animal accident"]
+    Aerospace: ["Impact"]
+
+evaluation:
+  precision_k_values: [1, 3, 5, 10]
+  recall_k_values: [1, 3, 5, 10]
+  max_docs_for_evaluation: 10
+  golden_dataset_path: "golden_dataset.json"
+  relevancy_threshold: 0.7
+  correctness_threshold: 0.5
+
+hybrid_search:
+  enabled: true
+  sparse_k: 50
+  rrf_k: 60
+  fusion: "rrf"
+  dense_weight: 0.5
+  sparse_weight: 0.5
+  bm25_persist_filename: "bm25_index.json"
+
+structured_output:
+  enabled: true
+  max_context_chars: 12000
+
+document_processing:
+  normalize_text: true
+  extract_headline_skills: true
+  multimodal_enabled: true
+
+guardrails:
+  enabled: true
+  require_user: false
+  max_user_input_chars: 2000
+  max_llm_output_chars: 16000
+  max_tool_output_chars: 60000
+  max_json_write_chars: 500000
+  max_context_chars: 60000
+  max_history_chars: 120000
+  blocked_patterns:
+    - "(?i)ignore\\s+(all\\s+)?(previous|above|prior)\\s+(instructions|prompts|rules)"
+    - "(?i)disregard\\s+(all\\s+)?(previous|above|prior)"
+    - "(?i)reveal\\s+(your|the)\\s+(system|initial)\\s+prompt"
+    - "(?i)output\\s+(your|the)\\s+(system|initial)\\s+prompt"
+    - "(?i)\\bapi[_-]?key\\b\\s*[:=]"
+  pii_redaction:
+    enabled: true
+    patterns:
+      - email
+      - phone
+      - ssn
+  allowed_url_schemes:
+    - "http"
+    - "https"
+
+mcp:
+  rag_server: "src/chatbot/mcp_servers/rag_server.py"
+  disaster_server: "src/chatbot/mcp_servers/disaster_server.py"
+  healthcare_server: "src/chatbot/mcp_servers/healthcare_server.py"
+  startup_timeout_s: 30
+
+disasters:
+  csv_files:
+    - "1900_2021_DISASTERS.xlsx - emdat data.csv"
+    - "1970-2021_DISASTERS.xlsx - emdat data.csv"
+  max_query_limit: 200
+  default_query_limit: 20
+  indexing_max_rows: 500
+  indexing_strategy: "recent"
+
+healthcare:
+  entity_types:
+    - Condition
+    - Symptom
+    - Medication
+    - Anatomy
+    - Procedure
+    - Dosage
+    - RiskFactor
+  max_input_chars: 8000
+
+agents:
+  max_turns: 10
+  triage:
+    name: "Triage Agent"
+    prompt_file: "triage_agent"
+  rag:
+    name: "Disaster Narrative RAG Agent"
+    prompt_file: "rag_agent"
+  disaster:
+    name: "Disaster Knowledge Agent"
+    prompt_file: "disaster_agent"
+  healthcare:
+    name: "Healthcare NL Agent"
+    prompt_file: "healthcare_agent"
+
+tracing:
+  enabled: true
+  exporters:
+    - console
+  redact_outputs: true
+  max_output_chars: 500
+
+logging:
+  level: INFO
+  format: "%(asctime)s %(name)s %(levelname)s %(message)s"

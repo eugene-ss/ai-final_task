@@ -1,0 +1,43 @@
+"""Pydantic domain models shared across the chatbot."""
+
+from chatbot.model.schemas import (
+    CitedCandidate,
+    DocumentMetadata,
+    EvaluationMetrics,
+    EvaluationQualityScores,
+    EvaluationQuery,
+    EvaluationResults,
+    ExcerptRelevanceScore,
+    HealthcareEntities,
+    HealthcareEntity,
+    HealthcareICD10Suggestion,
+    HealthcareRelation,
+    HealthcareSummary,
+    Permission,
+    RAGStructuredAnswer,
+    ResumeDocument,
+    Role,
+    SearchResult,
+    User,
+)
+
+__all__ = [
+    "CitedCandidate",
+    "DocumentMetadata",
+    "EvaluationMetrics",
+    "EvaluationQualityScores",
+    "EvaluationQuery",
+    "EvaluationResults",
+    "ExcerptRelevanceScore",
+    "HealthcareEntities",
+    "HealthcareEntity",
+    "HealthcareICD10Suggestion",
+    "HealthcareRelation",
+    "HealthcareSummary",
+    "Permission",
+    "RAGStructuredAnswer",
+    "ResumeDocument",
+    "Role",
+    "SearchResult",
+    "User",
+]
