@@ -65,8 +65,8 @@ def test_build_context_budget_truncates_to_budget():
 def test_build_context_budget_skips_when_budget_exhausted():
     srs = [_make_search_result("x" * 500, str(i)) for i in range(10)]
     out = AnswerGenerator.build_context_budget(srs, max_chars=600)
-    assert "resume_id=0" in out
-    assert "resume_id=9" not in out
+    assert "doc_id=0" in out
+    assert "doc_id=9" not in out
 
 def test_generate_answer_invalid_query_returns_message(gen, config_manager):
     ac = AccessControl(config_manager)

@@ -1,4 +1,4 @@
-# AI-Final Chatbot
+# AI-Disaster Chatbot
 
 A multi-agent chatbot focused entirely on **natural disasters** (EM-DAT data)
 and **clinical text**, composed from two prior modules:

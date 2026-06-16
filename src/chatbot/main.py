@@ -30,7 +30,7 @@ def _bootstrap() -> None:
 
 def _print_banner(model: str, tracing: bool) -> None:
     print("=" * 64)
-    print("  AI-Final Chatbot - RAG | Disasters | Healthcare NL")
+    print("  AI-Disaster Chatbot - RAG | Disasters | Healthcare NL")
     print(f"  Model: {model}")
     print("  Slash commands: /help /quit /clear /reindex")
     if tracing:

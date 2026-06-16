@@ -89,7 +89,7 @@ class AnswerGenerator:
             rid = getattr(meta, "id", "")
             cat = getattr(meta, "category", "")
             headline = getattr(meta, "headline", None) or ""
-            header = f"--- resume_id={rid} category={cat}"
+            header = f"--- doc_id={rid} category={cat}"
             if headline:
                 header += f" headline={headline[:80]}"
             header += " ---\n"
