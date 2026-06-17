@@ -1,4 +1,4 @@
-"""Tests for the Chroma-backed vector store wrapper (Chroma + Azure mocked)."""
+"""Tests for the Chroma-backed vector store wrapper (Chroma + Azure mocked)"""
 from __future__ import annotations
 
 from typing import Any, Dict, List, Optional
@@ -61,7 +61,6 @@ def vs(monkeypatch, config_manager):
 
     return VectorStore(config_manager)
 
-
 def _doc(text: str, chunk_uid: str, did: str = "1") -> Document:
     return Document(
         page_content=text,
@@ -75,7 +74,6 @@ def _doc(text: str, chunk_uid: str, did: str = "1") -> Document:
 
 def test_add_documents_deduplicates_by_chunk_uid(vs):
     vs.add_documents([_doc("a", "1:0"), _doc("b", "1:1")])
-    # Re-adding the same uids should skip.
     vs.add_documents([_doc("a", "1:0")])
     assert vs.get_collection_stats()["document_count"] == 2
 
@@ -97,12 +95,10 @@ def test_has_document(vs):
     assert vs.has_document("abc") is True
     assert vs.has_document("missing") is False
 
-
 def test_delete_documents_single_and_many(vs):
     vs.add_documents([_doc("text", "1:0", did="abc")])
     assert vs.delete_documents(["abc"]) is True
     assert vs.delete_documents(["abc", "def"]) is True
-    # Last call used $in
     last = vs.vectorstore._collection.deleted[-1]
     assert "$in" in str(last)
 

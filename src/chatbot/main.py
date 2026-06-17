@@ -1,4 +1,4 @@
-"""Interactive REPL for the ai-final chatbot.
+"""Interactive REPL for the ai-desister chatbot.
 
 Loads ``.env`` + ``config/app_config.yaml``, installs OpenTelemetry tracing, and
 starts the triage agent session. Slash commands:
@@ -14,19 +14,41 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 from pathlib import Path
 
-from dotenv import load_dotenv
-
+from dotenv import dotenv_values, load_dotenv
 
 def _bootstrap() -> None:
     src_dir = Path(__file__).resolve().parent.parent
     project_root = src_dir.parent
     if str(src_dir) not in sys.path:
         sys.path.insert(0, str(src_dir))
-    load_dotenv(project_root / ".env", override=True)
+    env_path = project_root / ".env"
+    load_dotenv(env_path, override=True)
+    file_env = {k: (v or "").strip() for k, v in dotenv_values(env_path).items()}
+    # Normalize alias env vars into canonical OPENAI_* keys so stale shell vars
+    # do not accidentally override intended .env values.
+    api_key = (os.environ.get("OPENAI_API_KEY") or "").strip()
+    if not file_env.get("OPENAI_API_KEY") and file_env.get("API_KEY"):
+        api_key = file_env["API_KEY"]
+    if not api_key:
+        api_key = (os.environ.get("API_KEY") or os.environ.get("AZURE_OPENAI_API_KEY") or "").strip()
+    if api_key:
+        os.environ["OPENAI_API_KEY"] = api_key
 
+    base_url = (os.environ.get("OPENAI_BASE_URL") or "").strip()
+    if not file_env.get("OPENAI_BASE_URL") and file_env.get("ENDPOINT_URL"):
+        base_url = file_env["ENDPOINT_URL"]
+    if not base_url:
+        base_url = (
+            os.environ.get("ENDPOINT_URL")
+            or os.environ.get("AZURE_OPENAI_ENDPOINT")
+            or ""
+        ).strip()
+    if base_url:
+        os.environ["OPENAI_BASE_URL"] = base_url
 
 def _print_banner(model: str, tracing: bool) -> None:
     print("=" * 64)
@@ -37,7 +59,6 @@ def _print_banner(model: str, tracing: bool) -> None:
         print("  (OpenTelemetry tracing enabled - spans printed to console)")
     print("=" * 64)
 
-
 def _print_help() -> None:
     print(
         "\nCommands:\n"
@@ -46,11 +67,9 @@ def _print_help() -> None:
         "  /clear    reset the in-memory conversation history\n"
         "  /reindex  ask the RAG agent to (re)ingest the corpus\n"
         "\nExample questions:\n"
-        "  - Find Python developers with cloud experience  (RAG)\n"
         "  - How many earthquakes hit Japan between 1990 and 2010?  (Disasters)\n"
         "  - Extract medications and conditions from this note: ...  (Healthcare)\n"
     )
-
 
 async def _interactive_loop() -> None:
     from chatbot.agent.orchestrator import AgentSession
@@ -105,14 +124,12 @@ async def _interactive_loop() -> None:
                 logging.exception("agent run failed")
                 print(f"\rAssistant: Error - {exc}")
 
-
 def main() -> None:
     _bootstrap()
     try:
         asyncio.run(_interactive_loop())
     except KeyboardInterrupt:
         print("\nGoodbye!")
-
 
 if __name__ == "__main__":  # pragma: no cover
     main()

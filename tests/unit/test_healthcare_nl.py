@@ -1,4 +1,4 @@
-"""Tests for the custom Healthcare NL API (LLM stubbed)."""
+"""Tests for the custom Healthcare NL API (LLM stubbed)"""
 from __future__ import annotations
 
 import pytest

@@ -1,4 +1,4 @@
-"""Tests for the answer generator (LLM + access control stubbed)."""
+"""Tests for the answer generator (LLM + access control stubbed)"""
 from __future__ import annotations
 
 from pathlib import Path

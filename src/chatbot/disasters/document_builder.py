@@ -41,8 +41,6 @@ def _fmt_int(value: Any) -> str:
         return str(value)
 
 def _fmt_usd(value: Any) -> str:
-    """Format a Total Damages ('000 US$) value as USD."""
-
     if value is None:
         return "n/a"
     try:

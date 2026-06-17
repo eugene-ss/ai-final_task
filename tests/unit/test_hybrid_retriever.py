@@ -1,4 +1,4 @@
-"""Tests for the hybrid retriever (RRF / weighted fusion + ACL post-filter)."""
+"""Tests for the hybrid retriever (RRF / weighted fusion + ACL post-filter)"""
 from __future__ import annotations
 
 from typing import Any, Dict, List

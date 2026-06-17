@@ -1,8 +1,8 @@
 """Tests for the orchestrator wiring (with Runner.run mocked).
 
-We avoid spawning all three MCP subprocesses + calling a real LLM here; instead
+Avoid spawning all three MCP subprocesses + calling a real LLM here; instead
 we verify that ``AgentSession.run`` validates input + output through the
-guardrails, passes the message history correctly, and that the triage agent is
+guardrails, passes the message history correctly and that the triage agent is
 constructed with the three specialist handoffs.
 """
 from __future__ import annotations

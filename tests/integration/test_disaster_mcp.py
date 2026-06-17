@@ -1,7 +1,6 @@
 """Integration test: spawn the Disaster MCP server as a subprocess and call its tools.
 
-This validates that the FastMCP plumbing + Pandas repository really work together
-in the same form the orchestrator uses.
+This validates that the FastMCP + Pandas repository work together in the same form the orchestrator uses.
 """
 from __future__ import annotations
 
@@ -16,7 +15,6 @@ pytestmark = pytest.mark.integration
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 SCRIPT = PROJECT_ROOT / "src" / "chatbot" / "mcp_servers" / "disaster_server.py"
-
 
 async def _call_tool(name: str, arguments: dict) -> dict:
     """Spawn the disaster server, call a tool, return the parsed JSON payload."""
@@ -61,7 +59,6 @@ async def test_disaster_stats_by_country_total_deaths():
     # Haiti 2010 should rank highly given the dataset.
     keys = [i["key"] for i in payload["items"]]
     assert "Haiti" in keys
-
 
 async def test_list_disaster_types_includes_known_categories():
     payload = await _call_tool("list_disaster_types", {})

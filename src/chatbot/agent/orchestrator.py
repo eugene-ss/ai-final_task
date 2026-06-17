@@ -1,4 +1,4 @@
-"""Triage orchestrator: routes user questions to RAG, Disaster, or Healthcare specialists.
+"""Triage orchestrator: routes user questions to RAG, Disaster or Healthcare specialists.
 
 Each specialist is backed by its own MCP stdio server. The triage agent uses
 the OpenAI Agents SDK ``Runner`` loop (implicit ReAct under the hood); the
@@ -36,7 +36,6 @@ from chatbot.settings.app_config import (
     AppConfig,
     PROJECT_ROOT,
     load_config,
-    require_env,
 )
 
 logger = logging.getLogger(__name__)
@@ -44,15 +43,28 @@ logger = logging.getLogger(__name__)
 _python_exe = sys.executable
 _openai_client_configured = False
 
+def _first_nonempty_env(*names: str) -> str:
+    for name in names:
+        value = (os.environ.get(name) or "").strip()
+        if value:
+            return value
+    raise RuntimeError(
+        f"Required environment variable is missing. Set one of: {', '.join(names)}."
+    )
 
 def _configure_openai_client(cfg: AppConfig) -> None:
     global _openai_client_configured
     if _openai_client_configured:
         return
 
-    api_key = require_env("OPENAI_API_KEY")
+    api_key = _first_nonempty_env("OPENAI_API_KEY", "API_KEY", "AZURE_OPENAI_API_KEY")
     timeout = cfg.llm.request_timeout_s
-    base_url = (os.environ.get("OPENAI_BASE_URL") or "").strip()
+    base_url = (
+        os.environ.get("OPENAI_BASE_URL")
+        or os.environ.get("ENDPOINT_URL")
+        or os.environ.get("AZURE_OPENAI_ENDPOINT")
+        or ""
+    ).strip()
     api_version = (cfg.llm.api_version or "").strip()
 
     if api_version:
@@ -78,10 +90,8 @@ def _configure_openai_client(cfg: AppConfig) -> None:
     set_default_openai_api("chat_completions")
     _openai_client_configured = True
 
-
 def _model_settings(cfg: AppConfig) -> ModelSettings:
     return ModelSettings(temperature=cfg.llm.temperature, max_tokens=cfg.llm.max_tokens)
-
 
 def _build_mcp_server(name: str, script_path: str, cfg: AppConfig) -> MCPServerStdio:
     abs_script = cfg.project_path(script_path)
@@ -92,7 +102,6 @@ def _build_mcp_server(name: str, script_path: str, cfg: AppConfig) -> MCPServerS
         params={"command": _python_exe, "args": [str(abs_script)], "env": env},
         client_session_timeout_seconds=cfg.mcp.startup_timeout_s,
     )
-
 
 def _create_specialist(
     cfg: AppConfig,
@@ -110,7 +119,6 @@ def _create_specialist(
         instructions=instructions,
         mcp_servers=[mcp_server],
     )
-
 
 def _create_triage_agent(
     cfg: AppConfig,
@@ -130,7 +138,6 @@ def _create_triage_agent(
         instructions=instructions,
         handoffs=handoffs,
     )
-
 
 class AgentSession:
     def __init__(self, cfg: Optional[AppConfig] = None) -> None:
@@ -197,7 +204,6 @@ class AgentSession:
         safe_output = validate_llm_output(result.final_output)
         safe_history = validate_message_history(result.to_input_list())
         return safe_output, safe_history
-
 
 async def run_query(
     query: str,

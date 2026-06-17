@@ -39,6 +39,16 @@ def _pack(tool_name: str, payload: object) -> str:
     text = json.dumps(payload, ensure_ascii=False, default=str, indent=2)
     return validate_tool_output(f"disasters.{tool_name}", text)
 
+def _error_payload(code: str, message: str, retryable: bool = False) -> dict:
+    return {
+        "ok": False,
+        "error": {
+            "code": code,
+            "message": message,
+            "retryable": retryable,
+        },
+    }
+
 @mcp.tool()
 async def query_disasters(
     disaster_type: Optional[str] = None,
@@ -70,7 +80,10 @@ async def query_disasters(
         )
     except Exception as exc:
         logger.exception("query_disasters failed")
-        return _pack("query_disasters", {"error": str(exc)})
+        return _pack(
+            "query_disasters",
+            _error_payload("INTERNAL_ERROR", "Disaster query failed."),
+        )
     return _pack("query_disasters", result)
 
 @mcp.tool()
@@ -103,10 +116,13 @@ async def disaster_stats(
             top_n=top_n,
         )
     except ValueError as exc:
-        return _pack("disaster_stats", {"error": str(exc)})
-    except Exception as exc:
+        return _pack("disaster_stats", _error_payload("INVALID_ARGUMENT", str(exc)))
+    except Exception:
         logger.exception("disaster_stats failed")
-        return _pack("disaster_stats", {"error": str(exc)})
+        return _pack(
+            "disaster_stats",
+            _error_payload("INTERNAL_ERROR", "Disaster statistics query failed."),
+        )
     return _pack("disaster_stats", result)
 
 @mcp.tool()
@@ -133,10 +149,16 @@ async def top_disasters_by_impact(
             year_to=year_to,
         )
     except ValueError as exc:
-        return _pack("top_disasters_by_impact", {"error": str(exc)})
-    except Exception as exc:  # noqa: BLE001
+        return _pack(
+            "top_disasters_by_impact",
+            _error_payload("INVALID_ARGUMENT", str(exc)),
+        )
+    except Exception:  # noqa: BLE001
         logger.exception("top_disasters_by_impact failed")
-        return _pack("top_disasters_by_impact", {"error": str(exc)})
+        return _pack(
+            "top_disasters_by_impact",
+            _error_payload("INTERNAL_ERROR", "Top-impact query failed."),
+        )
     return _pack("top_disasters_by_impact", result)
 
 @mcp.tool()

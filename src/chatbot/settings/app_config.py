@@ -211,7 +211,7 @@ class EnvironmentSettings(BaseSettings):
     vector_db_dir: str = "./vector-db"
     results_dir: str = "./results"
     data_dir: str = "./dataset"
-    bm25_hmac_key: str = Field("default-bm25-integrity-key", alias="BM25_HMAC_KEY")
+    bm25_hmac_key: str = Field("", alias="BM25_HMAC_KEY")
 
 def _expand_env(value: Any) -> Any:
     if isinstance(value, str):

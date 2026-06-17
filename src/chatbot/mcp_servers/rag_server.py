@@ -38,6 +38,16 @@ def _pack(tool_name: str, payload: object) -> str:
     )
     return validate_tool_output(f"rag.{tool_name}", text)
 
+def _error_payload(code: str, message: str, retryable: bool = False) -> dict:
+    return {
+        "ok": False,
+        "error": {
+            "code": code,
+            "message": message,
+            "retryable": retryable,
+        },
+    }
+
 def _serialize_result(result) -> dict:
     meta = result.document.metadata.model_dump(exclude_none=True)
     return {
@@ -63,9 +73,12 @@ async def hybrid_search(query: str, k: int = 5, category: Optional[str] = None) 
 
     try:
         results = _rag.search(query, k=max(1, int(k)), user=None)
-    except Exception as exc:
+    except Exception:
         logger.exception("hybrid_search failed")
-        return _pack("hybrid_search", {"error": str(exc)})
+        return _pack(
+            "hybrid_search",
+            _error_payload("INTERNAL_ERROR", "Hybrid retrieval failed."),
+        )
 
     if category:
         results = [
@@ -96,9 +109,12 @@ async def answer_with_rag(query: str, k: int = 5) -> str:
 
     try:
         bundle = _rag.answer(query, k=max(1, int(k)), user=None)
-    except Exception as exc:  # noqa: BLE001
+    except Exception:  # noqa: BLE001
         logger.exception("answer_with_rag failed")
-        return _pack("answer_with_rag", {"error": str(exc)})
+        return _pack(
+            "answer_with_rag",
+            _error_payload("INTERNAL_ERROR", "RAG answer generation failed."),
+        )
 
     payload = {
         "query": query,
@@ -131,9 +147,12 @@ async def ingest_corpus(
             strategy=strategy,
             force=force,
         )
-    except Exception as exc:
+    except Exception:
         logger.exception("ingest_corpus failed")
-        return _pack("ingest_corpus", {"error": str(exc)})
+        return _pack(
+            "ingest_corpus",
+            _error_payload("INTERNAL_ERROR", "Corpus ingestion failed."),
+        )
     return _pack(
         "ingest_corpus",
         {"counts": counts, "stats": _rag.get_system_stats()},

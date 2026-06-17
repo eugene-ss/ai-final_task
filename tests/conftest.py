@@ -1,4 +1,4 @@
-"""Shared pytest fixtures for unit + integration tests."""
+"""Shared pytest fixtures for unit and integration tests"""
 from __future__ import annotations
 
 import os
@@ -41,9 +41,6 @@ def app_config():
 
 @pytest.fixture
 def config_manager(tmp_path: Path, monkeypatch):
-    """A ConfigManager pointed at temporary directories so tests cannot
-    pollute the real ``vector-db`` / ``results`` folders."""
-
     monkeypatch.setenv("VECTOR_DB_DIR", str(tmp_path / "vector-db"))
     monkeypatch.setenv("RESULTS_DIR", str(tmp_path / "results"))
     from chatbot.settings.app_config import ConfigManager, EnvironmentSettings
@@ -84,8 +81,6 @@ class _StubStructured:
         return self._schema.model_validate(self._payload)
 
 class StubLLM:
-    """Simple stand-in for an LLM client used by HealthcareNLAPI tests."""
-
     def __init__(self, payloads_by_schema: Dict[str, Dict[str, Any]]) -> None:
         self._payloads = payloads_by_schema
         self.calls: List[Dict[str, Any]] = []

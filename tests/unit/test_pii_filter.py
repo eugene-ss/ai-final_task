@@ -1,4 +1,4 @@
-"""Tests for the standalone PII filter helpers."""
+"""Tests for the standalone PII filter helpers"""
 from __future__ import annotations
 
 from chatbot.security.pii_filter import (

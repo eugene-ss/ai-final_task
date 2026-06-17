@@ -1,4 +1,4 @@
-"""Tests for the unified guardrails."""
+"""Tests for the unified guardrails"""
 from __future__ import annotations
 
 import pytest
@@ -26,7 +26,6 @@ def test_validate_user_input_rejects_too_long():
     with pytest.raises(GuardrailViolation) as excinfo:
         g.validate_user_input("x" * 100)
     assert excinfo.value.code == "too_long"
-
 
 def test_validate_user_input_rejects_blocked_pattern(guardrails_config):
     g = Guardrails(guardrails_config)

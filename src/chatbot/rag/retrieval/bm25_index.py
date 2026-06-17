@@ -18,9 +18,15 @@ logger = logging.getLogger(__name__)
 
 _HMAC_KEY_ENV = "BM25_HMAC_KEY"
 _HMAC_SUFFIX = ".hmac"
+_INSECURE_HMAC_VALUES = {"", "default-bm25-integrity-key", "change-me-in-production"}
 
 def _get_hmac_key() -> bytes:
-    return os.environ.get(_HMAC_KEY_ENV, "default-bm25-integrity-key").encode("utf-8")
+    key = (os.environ.get(_HMAC_KEY_ENV) or "").strip()
+    if key in _INSECURE_HMAC_VALUES:
+        raise RuntimeError(
+            f"{_HMAC_KEY_ENV} must be set to a non-default secret before BM25 index operations."
+        )
+    return key.encode("utf-8")
 
 def _compute_hmac(data: bytes) -> str:
     return hmac.new(_get_hmac_key(), data, hashlib.sha256).hexdigest()
@@ -146,13 +152,13 @@ class BM25ChunkIndex:
             return False
         data = json_path.read_bytes()
         hmac_path = json_path.with_suffix(json_path.suffix + _HMAC_SUFFIX)
-        if hmac_path.is_file():
-            expected = hmac_path.read_text(encoding="utf-8").strip()
-            if not _verify_hmac(data, expected):
-                logger.error("BM25 index HMAC FAILED for %s; refusing to load", json_path)
-                return False
-        else:
-            logger.warning("No HMAC for BM25 index at %s; loading without integrity check", json_path)
+        if not hmac_path.is_file():
+            logger.error("BM25 index signature missing for %s; refusing to load", json_path)
+            return False
+        expected = hmac_path.read_text(encoding="utf-8").strip()
+        if not _verify_hmac(data, expected):
+            logger.error("BM25 index HMAC FAILED for %s; refusing to load", json_path)
+            return False
         try:
             payload = json.loads(data)
         except (json.JSONDecodeError, ValueError) as exc:

@@ -1,4 +1,4 @@
-"""Tests for the RAG layer's role-based access control over disaster categories."""
+"""Tests for the RAG layer's role-based access control over disaster categories"""
 from __future__ import annotations
 
 from chatbot.model.schemas import Permission, ResumeDocument, Role, User
@@ -7,15 +7,11 @@ from chatbot.rag.security_facade import AccessControl
 def _admin() -> User:
     return User(user_id="admin1", role=Role.ADMIN)
 
-
 def _ops_user() -> User:
-    """Role with read+analyze permissions, mapped to ClimateOps category set."""
-
     return User(user_id="ops1", role=Role.ANALYST, department="ClimateOps")
 
 def _response_user() -> User:
     return User(user_id="resp1", role=Role.HR_MANAGER, department="DisasterResponse")
-
 
 def test_admin_has_all_permissions(config_manager):
     ac = AccessControl(config_manager)

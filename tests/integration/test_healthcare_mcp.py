@@ -1,6 +1,6 @@
 """Integration test: spawn the Healthcare MCP server with a stubbed LLM.
 
-To avoid hitting a real LLM, we patch ``HealthcareNLAPI`` inside the spawned
+To avoid hitting a real LLM, patch ``HealthcareNLAPI`` inside the spawned
 subprocess by setting an environment flag that the server respects. Since the
 server constructs its API at import time using ``_build_llm``, we instead spawn
 a tiny wrapper script that swaps the API on the module before ``mcp.run()``.

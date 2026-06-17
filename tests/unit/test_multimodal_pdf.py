@@ -1,4 +1,4 @@
-"""Tests for the multimodal PDF extractor (without requiring real backends)."""
+"""Tests for the multimodal PDF extractor (without requiring real backends)"""
 from __future__ import annotations
 
 import io

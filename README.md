@@ -1,23 +1,14 @@
 # AI-Disaster Chatbot
 
-A multi-agent chatbot focused entirely on **natural disasters** (EM-DAT data)
-and **clinical text**, composed from two prior modules:
+A multi-agent chatbot focused entirely on **natural disasters** (EM-DAT data) and **clinical text**, composed from:
 
-- **RAG module** (originally [`ai-rag_task`](../ai-rag_task)) :: re-purposed to
-  index disaster-narrative documents derived from the EM-DAT CSVs, with the
-  same hybrid Chroma + BM25 retrieval, multimodal-aware ingestion, and
-  grounded answer generation.
-- **Agent/MCP module** (originally [`agentic-ai_task`](../agentic-ai_task)) ::
-  orchestration patterns (OpenAI Agents SDK triage + handoffs, FastMCP stdio
-  servers, OpenTelemetry tracing, guardrails) re-used to host **three new MCP
-  servers** for this project.
+- **RAG** :: Index disaster-narrative documents derived from the EM-DAT CSVs, with the hybrid Chroma + BM25 retrieval, multimodal-aware ingestion and answer generation.
+- **Agent/MCP** :: Orchestration patterns (OpenAI Agents SDK triage + handoffs, FastMCP stdio servers, OpenTelemetry tracing, guardrails) re-used to host **three new MCP servers** for this project.
 
-Added functionality (per the brief): a new Pandas-backed **Disaster MCP
-server** that answers structured queries about EM-DAT events. The chatbot also
-ships a **custom Healthcare NL API** behind a ReAct agent.
+Added functionality (per the brief): a new Pandas-backed **Disaster MCP server** that answers structured queries about EM-DAT events. The chatbot also ships a **custom Healthcare NL API** behind a ReAct agent.
 
-> There are inputs: two EM-DAT CSVs in [`dataset/`](dataset/) and a golden data
-> [`dataset/golden_dataset.json`](dataset/golden_dataset.json).
+> Dataset: EM-DAT CSVs in [`dataset/`](dataset/)
+> Golden dataset: [`dataset/golden_dataset.json`](dataset/golden_dataset.json).
 
 ---
 
@@ -39,8 +30,7 @@ ships a **custom Healthcare NL API** behind a ReAct agent.
 
 ## Focus-area mapping
 
-The brief calls out four areas to pay extra attention to. Each is realized
-concretely in code on the disaster domain:
+The brief calls out four areas to pay extra attention to. Each is realized concretely in code on the disaster domain:
 
 | Focus area | Where it lives |
 |---|---|
